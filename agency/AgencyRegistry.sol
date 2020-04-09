@@ -36,14 +36,14 @@ contract AgencyRegistry is Ownable {
     ///////////////
 
     constructor(address _userRegistry) public {
-        IUserRegistry userRegistry = IUserRegistry(_userRegistry);
+        userRegistry = IUserRegistry(_userRegistry);
     }
 
     /**
      * @notice 注册机构
      * @dev 机构名全局唯一，创建者作为管理员
      * @param _agencyName 机构名
-     * @param _agencyPhone 管理员手机号
+     * @param _adminPhone 管理员手机号
      */
     function register(bytes32 _agencyName, uint256 _adminPhone) external {
         require(_agencyName != bytes32(0), "AgencyRegistry: params not be null");
@@ -63,11 +63,11 @@ contract AgencyRegistry is Ownable {
 
     /**
      * @notice 重置机构管理员地址
-     * @dev 当Agency.admin对应的私钥丢失时，可用adminPhone进行验证码校验，验证通过后管理员将重置Agency的admin。
+     * @dev 当Agency.admin对应的私钥丢失时，可用Agency.adminPhone进行验证码校验，验证通过后管理员将重置Agency的admin。
      * @param _agencyName 机构名称
      * @param _newAddr 新外部账户地址
      */
-    function restAgencyAdmin(bytes32 _agencyName, address _newAddr) external onlyOwner {
+    function restAgencyAdmin(bytes32 _agencyName, address _newAddr) external view onlyOwner {
         require(_agencyName != bytes32(0) && _newAddr != address(0), "AgencyRegistry: params not be null");
 
         Agency memory agency = agencies[_agencyName];
@@ -105,11 +105,35 @@ contract AgencyRegistry is Ownable {
         uint256 _lastIndex = agencyMembers[_agencyName].length - 1;
         uint256 _lastUserId = agencyMembers[_agencyName][_lastIndex];
         if(_deleteIndex != _lastIndex) {
-            agencyMembers[_agencyName][_deleteIndex] = agencyMembers[_agencyName][_lastIndex];
-            agencyMemberIndex[_agencyName][_lastIndex] = _deleteIndex + 1;
+            agencyMembers[_agencyName][_deleteIndex] = _lastUserId;
+            agencyMemberIndex[_agencyName][_lastUserId] = _deleteIndex + 1;
         }
         delete agencyMemberIndex[_agencyName][_userId];
         agencyMembers[_agencyName].length--;
+    }
+
+    /**
+     * @notice 查询机构信息
+     * @param _agencyName 机构名
+     * @return _name 机构名
+     * @return _admin 机构管理员地址
+     * @return _adminPhone 机构管理员手机号
+     * @return _createdDate 机构创建时间
+     */
+    function searchAgencyInfo(bytes32 _agencyName) external view returns(
+        bytes32 _name,
+        address _admin,
+        uint256 _adminPhone,
+        uint256 _createdDate
+    ) {
+        require(_agencyName != bytes32(0), "AgencyRegistry: params not be null");
+        require(_isAgencyExist(_agencyName), "AgencyRegistry: current agencyName is already exist");
+
+        Agency memory agency = agencies[_agencyName];
+        _name = _agencyName;
+        _admin = agency.admin;
+        _adminPhone = agency.adminPhone;
+        _createdDate = agency.createdDate;
     }
 
     /**
@@ -137,21 +161,20 @@ contract AgencyRegistry is Ownable {
         return memberAgency[_userId];
     }
 
-    function _isAgencyAdmin(bytes32 _agencyName) internal returns(bool) {
+    function _isAgencyAdmin(bytes32 _agencyName) internal view returns(bool) {
         return agencies[_agencyName].admin == msg.sender;
     }
 
-    function _isAgencyExist(bytes32 _agencyName) internal returns(bool) {
+    function _isAgencyExist(bytes32 _agencyName) internal view returns(bool) {
         return agencyIndex[_agencyName] != uint256(0);
     }
 
-    function _isMemberAdded(uint256 _userId) internal returns(bool) {
+    function _isMemberAdded(uint256 _userId) internal view returns(bool) {
         return memberAgency[_userId] != bytes32(0);
     }
 
-    function _isAgencyMember(bytes32 _agencyName, uint256 _userId) internal returns(bool) {
+    function _isAgencyMember(bytes32 _agencyName, uint256 _userId) internal view returns(bool) {
         return memberAgency[_userId] == _agencyName;
     }
-
 
 }

@@ -84,7 +84,7 @@ contract UserRegistry is Ownable {
      * @param _phone 原有手机号
      * @param _newPhone 新手机号
      */
-    function changeUserPhone(uint256 _phone, uint256 _newPhone) {
+    function changeUserPhone(uint256 _phone, uint256 _newPhone) external {
         require(_phone != uint256(0) && _newPhone != uint256(0), "UserRegistry: params not be null");
         require(_isPhoneExist(_phone), "UserRegistry: _phone not exist");
         require(!_isPhoneExist(_newPhone), "UserRegistry: _newPhone is already exist");
