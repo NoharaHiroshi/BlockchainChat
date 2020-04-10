@@ -6,7 +6,7 @@ contract UserRegistry is Ownable {
     struct User {
         uint256 userId;             // 用户ID（主键）
         uint256 phone;              // 手机号（唯一）
-        bytes32 nickName;           // 昵称
+        string nickName;            // 昵称
         address addr;               // 外部账户地址
         uint256 createdDate;        // 注册时间
     }
@@ -30,8 +30,8 @@ contract UserRegistry is Ownable {
      * @param _phone 手机号
      * @param _nickName 昵称
      */
-    function register(uint256 _phone, bytes32 _nickName) external {
-        require(_phone != uint256(0) && _nickName != bytes32(0), "UserRegistry: params not be null");
+    function register(uint256 _phone, string calldata _nickName) external {
+        require(_phone != uint256(0) && bytes(_nickName).length != uint256(0), "UserRegistry: params not be null");
         require(!_isAddrRegistered(msg.sender), "UserRegistry: current address has already register");
         require(!_isPhoneExist(_phone), "UserRegistry: current phone has already exist");
 
@@ -53,8 +53,8 @@ contract UserRegistry is Ownable {
     * @notice 修改昵称
     * @param _nickName 昵称
     */
-    function changeNickName(bytes32 _nickName) external {
-        require(_nickName != bytes32(0), "UserRegistry: params not be null");
+    function changeNickName(string calldata _nickName) external {
+        require(bytes(_nickName).length != uint256(0), "UserRegistry: params not be null");
         require(_isAddrRegistered(msg.sender), "UserRegistry: current address not register");
 
         uint256 _userId = userAddrIds[msg.sender];
@@ -95,6 +95,30 @@ contract UserRegistry is Ownable {
         users[_userId].phone = _newPhone;
         userPhoneIds[_newPhone] = _userId;
     }
+    
+    /**
+     * @notice 查看用户信息 
+     * @return _userId 用户Id
+     * @return _nickName 昵称
+     * @return _addr 外部账户地址
+     * @return _createdDate 注册时间
+     */
+    function searchUserInfo() external view returns(
+        uint256 _userId,            
+        uint256 _phone,          
+        string memory _nickName,          
+        address _addr,              
+        uint256 _createdDate      
+    ) {
+        require(_isAddrRegistered(msg.sender), "UserRegistry: current address not register");
+
+        _userId = userAddrIds[msg.sender];
+        User memory user = users[_userId];
+        _phone = user.phone;
+        _nickName = user.nickName;
+        _addr = user.addr;
+        _createdDate = user.createdDate;
+    }
 
     /**
      * @notice 通过地址查询手机号
@@ -106,6 +130,18 @@ contract UserRegistry is Ownable {
         require(_isAddrRegistered(_addr), "UserRegistry: current address not register");
 
         _phone = users[userAddrIds[_addr]].phone;
+    }
+    
+    /**
+     * @notice 通过地址查询userId
+     * @param _addr 地址
+     * @return _userId 用户Id
+     */
+    function searchUserIdByAddr(address _addr) external view returns(uint256 _userId) {
+        require(_addr != address(0), "UserRegistry: _addr not be null");
+        require(_isAddrRegistered(_addr), "UserRegistry: current address not register");
+
+        _userId = userAddrIds[_addr];
     }
 
     /**
@@ -143,7 +179,7 @@ contract UserRegistry is Ownable {
     }
 
     function _isUserExist(uint256 _userId) internal view returns(bool) {
-        return _userId != uint256(0) && _userId <= id;
+        return _userId != uint256(0) && _userId < id;
     }
 
     function _isAddrRegistered(address _addr) internal view returns(bool) {
