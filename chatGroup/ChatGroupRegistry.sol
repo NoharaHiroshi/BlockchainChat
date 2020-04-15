@@ -1,6 +1,7 @@
 pragma solidity ^0.5.8;
 
 import "../user/IUserRegistry.sol";
+import "../chat/ChatRegistry.sol";
 
 contract ChatGroupRegistry {
 
@@ -8,6 +9,7 @@ contract ChatGroupRegistry {
         uint256 id;
         uint256 adminUserId;
         string groupName;
+        address chatAddr;
         uint256 createdDate;
     }
 
@@ -39,8 +41,9 @@ contract ChatGroupRegistry {
     * @param _groupId 群Id
     */
     modifier onlyAdmin(uint256 _groupId) {
+        uint256 _userId = userRegistry.searchUserIdByAddr(msg.sender);
         require(_isChatGroupExist(_groupId), "ChatGroupRegistry: current chat group not exist");
-        require(_isChatGroupAdmin(_groupId), "ChatGroupRegistry: not chat group admin");
+        require(_isChatGroupAdmin(_userId, _groupId), "ChatGroupRegistry: not chat group admin");
         _;
     }
 
@@ -49,8 +52,9 @@ contract ChatGroupRegistry {
     * @param _groupId 群Id
     */
     modifier onlyMember(uint256 _groupId) {
+        uint256 _userId = userRegistry.searchUserIdByAddr(msg.sender);
         require(_isChatGroupExist(_groupId), "ChatGroupRegistry: current chat group not exist");
-        require(_isChatGroupMember(_groupId), "ChatGroupRegistry: not chat group member");
+        require(_isChatGroupMember(_userId, _groupId), "ChatGroupRegistry: not chat group member");
         _;
     }
     
@@ -67,10 +71,12 @@ contract ChatGroupRegistry {
         require(bytes(_groupName).length != uint256(0), "ChatGroupRegistry: params not be null");
         
         uint256 _adminUserId = userRegistry.searchUserIdByAddr(msg.sender);
+        ChatRegistry chat = new ChatRegistry(groupId, address(userRegistry), address(this));
         ChatGroup memory chatGroup = ChatGroup({
             id: groupId,
             adminUserId: _adminUserId,
             groupName: _groupName,
+            chatAddr: address(chat),
             createdDate: now
         });
         chatGroups[groupId] = chatGroup;
@@ -133,8 +139,8 @@ contract ChatGroupRegistry {
      * @param _groupId 群Id
      * @return bool 是否为群成员
      */
-    function isChatGroupMember(uint256 _groupId) external view returns(bool) {
-        return _isChatGroupMember(_groupId);
+    function isChatGroupMember(uint256 _userId, uint256 _groupId) external view returns(bool) {
+        return _isChatGroupMember(_userId, _groupId);
     }
     
      /**
@@ -142,8 +148,8 @@ contract ChatGroupRegistry {
      * @param _groupId 群Id
      * @return bool msg.sender是否为群管理员
      */
-    function isChatGroupAdmin(uint256 _groupId) external view returns(bool) {
-        return _isChatGroupAdmin(_groupId);
+    function isChatGroupAdmin(uint256 _userId, uint256 _groupId) external view returns(bool) {
+        return _isChatGroupAdmin(_userId, _groupId);
     }
 
     /**
@@ -161,6 +167,7 @@ contract ChatGroupRegistry {
      * @return _id uint256 群Id
      * @return _adminUserId uint256 管理员用户Id
      * @return _groupName string 群名称
+     * @return _chatAddr address 群合约地址 
      * @return _createdDate uint256 群创建时间
      * @return _memberNames uint256[] 群成员用户Id列表
      */
@@ -169,6 +176,7 @@ contract ChatGroupRegistry {
         uint256 _adminUserId,
         string memory _groupName,
         uint256 _createdDate,
+        address _chatAddr,
         uint256[] memory _memberUserIds
     ) {
         ChatGroup memory chatGroup = chatGroups[_groupId];
@@ -176,6 +184,7 @@ contract ChatGroupRegistry {
         _adminUserId = chatGroup.adminUserId;
         _groupName = chatGroup.groupName;
         _createdDate = chatGroup.createdDate;
+        _chatAddr = chatGroup.chatAddr;
         _memberUserIds = chatMemberUserIds[_groupId];
     }
 
@@ -255,8 +264,7 @@ contract ChatGroupRegistry {
      * @param _groupId 群Id
      * @return bool msg.sender是否为群成员
      */
-    function _isChatGroupMember(uint256 _groupId) internal view returns(bool) {
-        uint256 _userId = userRegistry.searchUserIdByAddr(msg.sender);
+    function _isChatGroupMember(uint256 _userId, uint256 _groupId) internal view returns(bool) {
         return chatMemberIndex[_groupId][_userId] != uint256(0);
     }
 
@@ -266,8 +274,7 @@ contract ChatGroupRegistry {
      * @param _groupId 群Id
      * @return bool msg.sender是否为群管理员
      */
-    function _isChatGroupAdmin(uint256 _groupId) internal view returns(bool) {
-        uint256 _userId = userRegistry.searchUserIdByAddr(msg.sender);
+    function _isChatGroupAdmin(uint256 _userId, uint256 _groupId) internal view returns(bool) {
         return chatGroups[_groupId].adminUserId == _userId;
     }
     
