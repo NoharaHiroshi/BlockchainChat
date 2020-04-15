@@ -8,6 +8,7 @@ contract AgencyRegistry is Ownable {
     struct Agency {
         bytes32 agencyName;         // 机构名（唯一性标识）
         uint256 adminUserId;        // 机构管理员ID
+        uint8 status;               // 状态 1：待审核、2：审核未通过、3：审核通过
         uint256 createdDate;        // 创建时间
     }
 
@@ -52,6 +53,7 @@ contract AgencyRegistry is Ownable {
         Agency memory agency = Agency({
             agencyName: _agencyName,
             adminUserId: _adminUserId,
+            status: uint8(1),
             createdDate: now
         });
 
@@ -69,13 +71,24 @@ contract AgencyRegistry is Ownable {
      */
     function restAgencyAdmin(bytes32 _agencyName, uint256 _adminUserId) external onlyOwner {
         require(_agencyName != bytes32(0) && _adminUserId != uint256(0), "AgencyRegistry: params not be null");
+        require(_isAgencyExist(_agencyName), "AgencyRegistry: current agency not exist");
         require(userRegistry.isUserExist(_adminUserId), "AgencyRegistry: adminUserId not exist");
 
         agencies[_agencyName].adminUserId = _adminUserId;
         if(!_isAgencyMember(_agencyName, _adminUserId)) {
             _addMember(_agencyName, _adminUserId);
         }
-        
+    }
+
+    /**
+     * @notice 链管理员审核机构信息
+     * @dev 当机构认证通过后，才能添加和删减成员
+     * @param _agencyName 机构名称
+     * @param _status 审核状态
+     */
+    function verifyAgency(bytes32 _agencyName, uint8 _status) external onlyOwner {
+        require(_agencyName != bytes32(0) && _status != uint8(0), "AgencyRegistry: params not be null");
+        agencies[_agencyName].status = _status;
     }
 
     /**
@@ -85,6 +98,7 @@ contract AgencyRegistry is Ownable {
      * @param _userId 用户名
      */
     function addMember(bytes32 _agencyName, uint256 _userId) external onlyAgencyAdmin(_agencyName){
+        require(_isAgencyPass(_agencyName), "AgencyRegistry: current agency not pass");
         _addMember(_agencyName, _userId);
     }
 
@@ -95,6 +109,7 @@ contract AgencyRegistry is Ownable {
      * @param _userId 用户名
      */
     function removeMember(bytes32 _agencyName, uint256 _userId) external onlyAgencyAdmin(_agencyName) {
+        require(_isAgencyPass(_agencyName), "AgencyRegistry: current agency not pass");
         require(!_isAgencyAdmin(_agencyName, _userId), "AgencyRegistry: adminUser can not remove");
         _removeMember(_agencyName, _userId);
     }
@@ -104,11 +119,13 @@ contract AgencyRegistry is Ownable {
      * @param _agencyName 机构名
      * @return _name 机构名
      * @return _adminUserId 机构管理员地址
+     * @return _status 机构状态 
      * @return _createdDate 机构创建时间
      */
     function searchAgencyInfo(bytes32 _agencyName) external view returns(
         bytes32 _name,
         uint256 _adminUserId,
+        uint8 _status,
         uint256 _createdDate
     ) {
         require(_agencyName != bytes32(0), "AgencyRegistry: params not be null");
@@ -117,6 +134,7 @@ contract AgencyRegistry is Ownable {
         Agency memory agency = agencies[_agencyName];
         _name = _agencyName;
         _adminUserId = agency.adminUserId;
+        _status = agency.status;
         _createdDate = agency.createdDate;
     }
 
@@ -162,10 +180,14 @@ contract AgencyRegistry is Ownable {
         return memberAgency[_userId] == _agencyName;
     }
     
+    function _isAgencyPass(bytes32 _agencyName) internal view returns(bool) {
+        return agencies[_agencyName].status == uint256(3);
+    }
+    
     function _addMember(bytes32 _agencyName, uint256 _userId) internal {
         require(_agencyName != bytes32(0) && _userId != uint256(0), "AgencyRegistry: params not be null");
         require(userRegistry.isUserExist(_userId), "AgencyRegistry: userId not exist");
-        require(!_isMemberAdded(_userId), "AgencyRegistry: userId has already added");
+        require(!_isMemberAdded(_userId), "AgencyRegistry: userId has already had agency");
 
         agencyMembers[_agencyName].push(_userId);
         agencyMemberIndex[_agencyName][_userId] = agencyMembers[_agencyName].length;
