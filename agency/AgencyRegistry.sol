@@ -28,7 +28,7 @@ contract AgencyRegistry is Ownable {
 
     modifier onlyAgencyAdmin(bytes32 _agencyName) {
         uint256 _userId = userRegistry.searchUserIdByAddr(msg.sender);
-        require(_isAgencyAdmin(_agencyName, _userId), "AgencyRegistry: not authorized");
+        require(_isAgencyAdmin(_agencyName, _userId), "AgencyRegistry: only agency admin call");
         _;
     }
 
@@ -64,16 +64,16 @@ contract AgencyRegistry is Ownable {
     }
 
     /**
-     * @notice 重置机构管理员地址
+     * @notice 重置机构管理员
      * @dev 当Agency.admin对应的私钥丢失时，可用Agency.adminPhone进行验证码校验，验证通过后管理员将重置Agency的admin。
      * @param _agencyName 机构名称
      * @param _adminUserId 新管理员用户ID 
      */
-    function restAgencyAdmin(bytes32 _agencyName, uint256 _adminUserId) external onlyOwner {
+    function restAgencyAdmin(bytes32 _agencyName, uint256 _adminUserId) external onlyAgencyAdmin(_agencyName) {
         require(_agencyName != bytes32(0) && _adminUserId != uint256(0), "AgencyRegistry: params not be null");
         require(_isAgencyExist(_agencyName), "AgencyRegistry: current agency not exist");
         require(userRegistry.isUserExist(_adminUserId), "AgencyRegistry: adminUserId not exist");
-
+   
         agencies[_agencyName].adminUserId = _adminUserId;
         if(!_isAgencyMember(_agencyName, _adminUserId)) {
             _addMember(_agencyName, _adminUserId);
