@@ -114,6 +114,10 @@ contract ChatGroupController is ChatGroupStorageStateful, Ownable {
     function changeChatGroupAdmin(uint256 _chatGroupId,  uint256 _newAdminUserId) external onlyAdmin(_chatGroupId) {
         (, string memory _groupName,) = chatGroupStorage.select(_chatGroupId);
         require(chatGroupStorage.update(_chatGroupId, _newAdminUserId, _groupName) == int(1), "chatGroupController: update chat group name error");
+
+        if(!isChatGroupMember(_chatGroupId, _newAdminUserId)) {
+            require(chatGroupUserRelStorage.insert(_chatGroupId, _newAdminUserId) == int(1), "chatGroupController: add chat group admin error");
+        }
         
         emit ChangeChatGroupAdmin(_chatGroupId, _newAdminUserId);
     }
