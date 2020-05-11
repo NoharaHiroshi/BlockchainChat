@@ -16,6 +16,9 @@ contract UserRegistry is Ownable {
         address addr;               // 外部账户地址（全局唯一）
         uint256 createdDate;        // 注册时间
     }
+    
+    uint8 constant SEX_WOWAM = 1;
+    uint8 constant SEX_MAN = 2; 
 
     // 用于合约分配userId
     uint256 id = 1;
