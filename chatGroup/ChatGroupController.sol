@@ -78,7 +78,7 @@ contract ChatGroupController is ChatGroupStorageStateful, Ownable {
 
     /**
      * @notice 移出群成员
-     * @dev 只有管理员可以强制将群用户移出聊天群
+     * @dev 限管理员调用
      * @dev 管理员不可从聊天群中移除自己，如果要退群，需要先将群管理权限移交给其他成员
      * @param _chatGroupId 群Id
      * @param _userId 用户Id
@@ -94,7 +94,7 @@ contract ChatGroupController is ChatGroupStorageStateful, Ownable {
 
     /**
      * @notice 修改群名称
-     * @dev 只有管理员可以修改群名称
+     * @dev 限管理员调用
      * @param _chatGroupId 群Id
      * @param _newName 新群名称
      */
