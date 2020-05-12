@@ -67,7 +67,7 @@ contract ChatController is ChatStorageStateful, Ownable {
      */
     function revertMsg(uint256 _chatGroupId, uint256 _chatOrderNum) external onlySelf(_chatGroupId, _chatOrderNum) {
         (, uint256 _fromUserId, uint256 _createdDate) = chatStorage.select(_chatGroupId, _chatOrderNum);
-        require(now <= _createdDate + uint256(5) * uint256(1000) * 1 minutes, "ChatController: only revert msg within 5 minutes");
+        require(now <= _createdDate + uint256(5) * 1 minutes, "ChatController: only revert msg within 5 minutes");
         require(chatStorage.remove(_chatGroupId, _chatOrderNum) == int(1), "ChatController: remove msg error");
 
         emit RevertMsg(_chatGroupId, _chatOrderNum, _fromUserId);
