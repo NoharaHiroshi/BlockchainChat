@@ -4,7 +4,7 @@ import "../library/Proxy.sol";
 import "./UserStorageStateful.sol";
 
 /**
- * 用户代理合约
+ * 用户入口合约
  */
 contract UserProxy is UserStorageStateful, Proxy {
 

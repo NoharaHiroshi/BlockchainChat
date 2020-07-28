@@ -35,7 +35,7 @@ contract UserStorage is BaseStorage {
 
     /**
     * @notice 插入数据
-    * @dev 限代理合约调用
+    * @dev 限入口合约调用
     * @dev user_id为主键, phone, addr为唯一性索引
     * @param _userId 用户Id
     * @param _phone 用户手机号
@@ -148,7 +148,7 @@ contract UserStorage is BaseStorage {
 
     /**
     * @notice 更新数据
-    * @dev 限代理合约调用
+    * @dev 限入口合约调用
     * @param _userId 用户Id
     * @param _phone 用户手机号
     * @param _name 用户名
@@ -189,7 +189,7 @@ contract UserStorage is BaseStorage {
 
     /**
     * @notice 删除数据
-    * @dev 限代理合约调用
+    * @dev 限入口合约调用
     * @param _userId 用户Id
     * @return int 提交成功数量
     */
