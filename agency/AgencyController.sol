@@ -36,7 +36,6 @@ contract AgencyController is AgencyStorageStateful, Ownable {
     /**
      * @notice 重设机构管理员
      * @dev 限机构管理员调用
-     * @dev 当Agency.admin对应的私钥丢失时，可用Agency.adminPhone进行验证码校验，验证通过后管理员将重置Agency的admin。
      * @param _agencyName 机构名称
      * @param _newAdminUserId 新管理员用户ID
      */

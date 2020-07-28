@@ -4,7 +4,7 @@ import "./Ownable.sol";
 import "./Address.sol";
 
 /**
- * 代理合约，用于转发交易至逻辑合约
+ * 入口合约，用于转发交易至逻辑合约
  */
 contract Proxy is Ownable {
 

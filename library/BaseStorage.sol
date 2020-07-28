@@ -7,7 +7,7 @@ import "./Ownable.sol";
  */
 contract BaseStorage is Ownable {
 
-    // 代理地址
+    // 入口地址
     address public proxyAddress;
 
     ///////////////
@@ -24,7 +24,7 @@ contract BaseStorage is Ownable {
     //// Modifier
     ///////////////
 
-    // 仅限代理合约调用
+    // 仅限入口合约调用
     modifier onlyProxy() {
         require(msg.sender == proxyAddress, "BaseStorage: only proxy can call");
         _;
@@ -34,7 +34,7 @@ contract BaseStorage is Ownable {
     //// Functions
     ///////////////
 
-    // 设置代理
+    // 设置入口
     function setProxy(address _proxy) external onlyOwner {
         proxyAddress = _proxy;
         emit SetProxy(msg.sender, _proxy);

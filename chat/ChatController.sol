@@ -36,7 +36,7 @@ contract ChatController is ChatStorageStateful, Ownable {
     */
     modifier onlySelf(uint256 _chatGroupId, uint256 _chatOrderNum) {
         (uint256 _operatorId, , , , , ) = userStorage.selectByAddr(msg.sender);
-        (, uint256 _fromUserId, ) = chatStorage.select(_chatGroupId, _chatOrderNum);
+        (, , uint256 _fromUserId, ) = chatStorage.select(_chatGroupId, _chatOrderNum);
         require(_operatorId == _fromUserId, "ChatController: only send msg self call");
         _;
     }
@@ -50,12 +50,13 @@ contract ChatController is ChatStorageStateful, Ownable {
      * @dev 限群组成员发送信息
      * @param _chatGroupId 群组Id
      * @param _chatOrderNum 信息编号
+     * @param _chatType 信息类型
      * @param _contentHash 信息hash
      */
-    function sendMsg(uint256 _chatGroupId, uint256 _chatOrderNum, string _contentHash) external onlyMember(_chatGroupId) {
+    function sendMsg(uint256 _chatGroupId, uint256 _chatOrderNum, uint256 _chatType, string _contentHash) external onlyMember(_chatGroupId) {
         (uint256 _fromUserId, , , , , ) = userStorage.selectByAddr(msg.sender);
 
-        require(chatStorage.insert(_chatGroupId, _chatOrderNum, _contentHash, _fromUserId) == int(1), "ChatController: insert msg error");
+        require(chatStorage.insert(_chatGroupId, _chatOrderNum, _chatType, _contentHash, _fromUserId) == int(1), "ChatController: insert msg error");
         emit SendMsg(_chatGroupId, _fromUserId);
     }
 
@@ -66,7 +67,7 @@ contract ChatController is ChatStorageStateful, Ownable {
      * @param _chatOrderNum 信息编号
      */
     function revertMsg(uint256 _chatGroupId, uint256 _chatOrderNum) external onlySelf(_chatGroupId, _chatOrderNum) {
-        (, uint256 _fromUserId, uint256 _createdDate) = chatStorage.select(_chatGroupId, _chatOrderNum);
+        (, , uint256 _fromUserId, uint256 _createdDate) = chatStorage.select(_chatGroupId, _chatOrderNum);
         require(now <= _createdDate + uint256(5) * 1 minutes, "ChatController: only revert msg within 5 minutes");
         require(chatStorage.remove(_chatGroupId, _chatOrderNum) == int(1), "ChatController: remove msg error");
 
@@ -78,16 +79,18 @@ contract ChatController is ChatStorageStateful, Ownable {
     * @dev 获取聊天群组指定编号信息
     * @param _chatGroupId 聊天群组Id
     * @param _chatOrderNum 信息编号
+    * @return _chatType 信息类型
     * @return _contentHash 返回消息hash
     * @return _fromUserId 返回消息发送者userId
     * @return _createdDate 返回消息发送时间
     */
     function getMsg(uint256 _chatGroupId, uint256 _chatOrderNum) external view returns(
+        uint256 _chatType,
         string memory _contentHash,
         uint256 _fromUserId,
         uint256 _createdDate
     ) {
-        (_contentHash, _fromUserId, _createdDate) = chatStorage.select(_chatGroupId, _chatOrderNum);
+        (_chatType, _contentHash, _fromUserId, _createdDate) = chatStorage.select(_chatGroupId, _chatOrderNum);
     }
 
 

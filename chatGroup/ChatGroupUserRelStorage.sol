@@ -19,7 +19,7 @@ contract ChatGroupUserRelStorage is BaseStorage {
 
     /**
     * @notice 插入数据
-    * @dev 限代理合约调用
+    * @dev 限入口合约调用
     * @param _chatGroupId 聊天群组Id
     * @param _userId 用户Id
     * @return int 提交成功数量

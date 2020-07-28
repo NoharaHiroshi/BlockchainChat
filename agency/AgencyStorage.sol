@@ -10,7 +10,7 @@ contract AgencyStorage is BaseStorage {
     /**
     *  机构
     *  +---------------+---------------------+---------------------------------------------------+
-    *  | Field         | Type                | Type                                              |
+    *  | Field         | Type                | Desc                                              |
     *  +---------------+---------------------+---------------------------------------------------+
     *  | agency_name   | string              | 机构名                                            |
     *  | admin_user_id | uint256             | 机构管理员Id                                      |
@@ -33,7 +33,7 @@ contract AgencyStorage is BaseStorage {
 
     /**
     * @notice 插入数据
-    * @dev 限代理合约调用
+    * @dev 限入口合约调用
     * @param _agencyName 机构名称
     * @param _adminUserId 管理员用户编号
     * @param _status 机构状态
@@ -82,7 +82,7 @@ contract AgencyStorage is BaseStorage {
 
     /**
     * @notice 更新数据
-    * @dev 限代理合约调用
+    * @dev 限入口合约调用
     * @param _agencyName 机构名称
     * @param _adminUserId 管理员用户编号
     * @param _status 机构状态
@@ -105,7 +105,7 @@ contract AgencyStorage is BaseStorage {
 
     /**
     * @notice 删除数据
-    * @dev 限代理合约调用
+    * @dev 限入口合约调用
     * @param _agencyName 机构名称
     * @return int 提交成功数量
     */

@@ -4,7 +4,7 @@ import "../library/Proxy.sol";
 import "./AgencyStorageStateful.sol";
 
 /**
- * 机构代理合约
+ * 机构入口合约
  */
 contract AgencyProxy is AgencyStorageStateful, Proxy {
 

@@ -30,7 +30,7 @@ contract ChatGroupStorage is BaseStorage {
 
     /**
     * @notice 插入数据
-    * @dev 限代理合约调用
+    * @dev 限入口合约调用
     * @dev id为主键
     * @param _chatGroupId 聊天群组Id
     * @param _adminUserId 群管理员用户Id
@@ -78,7 +78,7 @@ contract ChatGroupStorage is BaseStorage {
 
     /**
     * @notice 更新数据
-    * @dev 限代理合约调用
+    * @dev 限入口合约调用
     * @param _chatGroupId 聊天群组Id
     * @param _adminUserId 群管理员用户Id
     * @param _groupName 聊天群名称
@@ -102,7 +102,7 @@ contract ChatGroupStorage is BaseStorage {
 
     /**
    * @notice 删除数据
-   * @dev 限代理合约调用
+   * @dev 限入口合约调用
    * @param _chatGroupId 聊天群组Id
    * @return int 提交成功数量
    */

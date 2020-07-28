@@ -4,7 +4,7 @@ import "../library/Proxy.sol";
 import "./ChatStorageStateful.sol";
 
 /**
- * 信息代理合约
+ * 信息入口合约
  */
 contract ChatProxy is ChatStorageStateful, Proxy {
 
